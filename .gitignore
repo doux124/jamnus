@@ -1,0 +1,14 @@
+# Ignore Conda environment
+env/
+
+# Backend
+backend/__pycache__/
+backend/*.pyc
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+
+# General
+.env
+.DS_Store
