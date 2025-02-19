@@ -7,8 +7,8 @@ app = Flask(__name__)
 CORS(app)  # Enable Cross-Origin Resource Sharing
 
 # Initialize the ReceiptProcessor with environment variables for project ID and PAT (Personal Access Token)
-project_id = os.getenv('JAMAI_PROJECT_ID')
-pat = os.getenv('JAMAI_PAT')
+project_id = "proj_4d4ac300b826e16d940f59e4"
+pat = "jamai_pat_7f05cdcdd67fa7b93625180f4a841861ba49507ea9ec06ff"
 
 # Instantiate the processor class
 processor = ReceiptProcessor(project_id, pat)

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 function App() {
   const [shopName, setShopName] = useState('');
@@ -8,12 +9,10 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle file input change
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
 
-  // Handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
     
@@ -24,8 +23,8 @@ function App() {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('project-id', process.env.REACT_APP_JAMAI_PROJECT_ID);  // Uses the project ID from the .env file
-    formData.append('pat', process.env.REACT_APP_JAMAI_PAT);  // Uses the PAT from the .env file
+    formData.append('project-id', process.env.REACT_APP_JAMAI_PROJECT_ID);
+    formData.append('pat', process.env.REACT_APP_JAMAI_PAT);
 
     setLoading(true);
 
@@ -50,23 +49,35 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Receipt Processor</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="file" onChange={handleFileChange} />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Processing...' : 'Submit Receipt'}
-        </button>
-      </form>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {shopName && (
-        <div>
-          <h2>Receipt Information:</h2>
-          <p><strong>Shop Name:</strong> {shopName}</p>
-          <p><strong>Total:</strong> {total}</p>
+      <div className="chatbox">
+        <div className="chat-message bot-message">
+          <h1>Receipt Processor</h1>
+          <p>Hi! Please upload your receipt for processing.</p>
         </div>
-      )}
+
+        {error && <div className="chat-message error-message"><p>{error}</p></div>}
+
+        <div className="chat-message user-message">
+          <form onSubmit={handleSubmit}>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="file-input"
+            />
+            <button type="submit" disabled={loading} className="submit-btn">
+              {loading ? 'Processing...' : 'Submit Receipt'}
+            </button>
+          </form>
+        </div>
+
+        {shopName && (
+          <div className="chat-message bot-message">
+            <h2>Receipt Information:</h2>
+            <p><strong>Shop Name:</strong> {shopName}</p>
+            <p><strong>Total:</strong> {total}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
