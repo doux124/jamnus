@@ -1,17 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from receipt_processor import ReceiptProcessor
+from law import Law
 import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-CORS(app)  # Enable Cross-Origin Resource Sharing
+CORS(app, origins=["http://localhost:5173"])
 
-# Initialize the ReceiptProcessor with environment variables for project ID and PAT (Personal Access Token)
-project_id = "proj_4d4ac300b826e16d940f59e4"
-pat = "jamai_pat_7f05cdcdd67fa7b93625180f4a841861ba49507ea9ec06ff"
+load_dotenv()
+project_id = os.getenv("PROJECT_ID")
+pat = os.getenv("PAT")
 
 # Instantiate the processor class
-processor = ReceiptProcessor(project_id, pat)
+processor = Law(project_id, pat)
 
 @app.route('/')
 def index():

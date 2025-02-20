@@ -3,7 +3,7 @@ import argparse
 from jamaibase import JamAI, protocol as p
 from typing import Dict, Optional
 
-class ReceiptProcessor:
+class Law:
     def __init__(self, project_id: str, pat: str):
         self.client = JamAI(
             project_id=project_id,
@@ -34,47 +34,22 @@ class ReceiptProcessor:
             response = self.client.add_table_rows(
                 table_type=p.TableType.action,
                 request=p.RowAddRequest(
-                    table_id="receipt",
-                    data=[{"Image": file_response.uri}],
+                    table_id="legal",
+                    data=[{"pic": file_response.uri}],
                     stream=False,
                 ),
             )
             
             results = {
-                "shop_name": response.rows[0].columns["Shop Name"].text,
-                "total": response.rows[0].columns["Total"].text
+                "law": response.rows[0].columns["law"].text,
+                "rec": response.rows[0].columns["rec"].text
             }
+            print(results)
             return results
             
         except Exception as e:
             print(f"Error: {str(e)}")
             return None
-
-def process_folder(folder_path: str, processor: ReceiptProcessor) -> None:
-    """Process all receipts in a folder"""
-    if not os.path.exists(folder_path):
-        print(f"Folder not found: {folder_path}")
-        return
-
-    results = []
-    for filename in os.listdir(folder_path):
-        if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
-            image_path = os.path.join(folder_path, filename)
-            result = processor.process_receipt(image_path)
-            if result:
-                results.append({
-                    "filename": filename,
-                    **result
-                })
-    
-    # Print results in a formatted way
-    print("\nProcessing Results:")
-    print("-" * 50)
-    for result in results:
-        print(f"File: {result['filename']}")
-        print(f"Shop Name: {result['shop_name']}")
-        print(f"Total: {result['total']}")
-        print("-" * 50)
 
 def main():
     # Set up argument parser
@@ -86,21 +61,16 @@ def main():
     args = parser.parse_args()
 
     # Initialize processor
-    processor = ReceiptProcessor(args.project_id, args.pat)
+    processor = Law(args.project_id, args.pat)
 
-    # Process input
-    if os.path.isfile(args.input):
-        # Single file processing
-        result = processor.process_receipt(args.input)
-        if result:
-            print("\nResults:")
-            print("-" * 50)
-            print(f"Shop Name: {result['shop_name']}")
-            print(f"Total: {result['total']}")
-            print("-" * 50)
-    else:
-        # Folder processing
-        process_folder(args.input, processor)
+    # Single file processing
+    result = processor.process_receipt(args.input)
+    if result:
+        print("\nResults:")
+        print("-" * 50)
+        print(f"Shop Name: {result['shop_name']}")
+        print(f"Total: {result['total']}")
+        print("-" * 50)
 
 if __name__ == "__main__":
     main()
