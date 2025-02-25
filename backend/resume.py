@@ -3,7 +3,7 @@ import argparse
 from jamaibase import JamAI, protocol as p
 from typing import Dict, Optional
 
-class Law:
+class Resume:
     def __init__(self, project_id: str, pat: str):
         self.client = JamAI(
             project_id=project_id,
@@ -21,7 +21,7 @@ class Law:
             
         return True
 
-    def process_law(self, image_path: str) -> Optional[Dict[str, str]]:
+    def process_resume(self, image_path: str) -> Optional[Dict[str, str]]:
         try:
             self.validate_image(image_path)
             
@@ -34,15 +34,15 @@ class Law:
             response = self.client.add_table_rows(
                 table_type=p.TableType.action,
                 request=p.RowAddRequest(
-                    table_id="legal",
-                    data=[{"pic": file_response.uri}],
+                    table_id="resume",
+                    data=[{"resume": file_response.uri}],
                     stream=False,
                 ),
             )
             
             results = {
-                "law": response.rows[0].columns["law"].text,
-                "rec": response.rows[0].columns["rec"].text
+                "pros": response.rows[0].columns["pros"].text,
+                "cons": response.rows[0].columns["cons"].text
             }
             print(results)
             return results
@@ -61,15 +61,15 @@ def main():
     args = parser.parse_args()
 
     # Initialize processor
-    processor = Law(args.project_id, args.pat)
+    processor = Resume(args.project_id, args.pat)
 
     # Single file processing
-    result = processor.process_law(args.input)
+    result = processor.process_receipt(args.input)
     if result:
         print("\nResults:")
         print("-" * 50)
-        print(f"Law: {result['law']}")
-        print(f"Recommendation: {result['rec']}")
+        print(f"Pros: {result['pros']}")
+        print(f"Cons: {result['cons']}")
         print("-" * 50)
 
 if __name__ == "__main__":

@@ -1,77 +1,100 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from law import Law
 import os
 from dotenv import load_dotenv
 
-app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"])
+from law import Law
+from resume import Resume
+from indiv import Indiv
+from nego import Nego
+from conflict import Conflict
 
+app = Flask(__name__)
+CORS(app)
+# CORS(app, origins=["http://localhost:5173"])
+
+# Load environment variables
 load_dotenv()
 project_id = os.getenv("PROJECT_ID")
 pat = os.getenv("PAT")
 
-# Instantiate the processor class
-processor = Law(project_id, pat)
+# Validate environment variables
+if not project_id or not pat:
+    raise ValueError("Missing PROJECT_ID or PAT in environment variables")
 
-@app.route('/')
-def index():
-    return "Welcome to the Receipt Processor API"
+# Instantiate processor classes
+lawProcessor = Law(project_id, pat)
+resumeProcessor = Resume(project_id, pat)
+indivProcessor = Indiv(project_id, pat)
+negoProcessor = Nego(project_id, pat)
+conflictProcessor = Conflict(project_id, pat)
 
-@app.route('/process_receipt', methods=['POST'])
-def process_receipt():
-    # Check if an image file is part of the request
+# Helper function to process file-based requests
+def process_file_request(request, processor, method_name):
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
-    
+
     file = request.files['file']
-    
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
-    
-    # Save the file to a temporary location
+
+    temp_filename = os.path.join('temp', file.filename)
+    os.makedirs(os.path.dirname(temp_filename), exist_ok=True)
+
     try:
-        temp_filename = os.path.join('temp', file.filename)
-        os.makedirs(os.path.dirname(temp_filename), exist_ok=True)
         file.save(temp_filename)
+        result = getattr(processor, method_name)(temp_filename)  # Dynamically call method
 
-        # Process the receipt with the ReceiptProcessor class
-        result = processor.process_receipt(temp_filename)
+        os.remove(temp_filename)  # Cleanup temp file
+
         if result:
-            # Clean up the saved temporary file after processing
-            os.remove(temp_filename)
             return jsonify(result), 200
-        else:
-            os.remove(temp_filename)
-            return jsonify({"error": "Failed to process receipt"}), 500
+        return jsonify({"error": "Failed to process"}), 500
 
     except Exception as e:
+        if os.path.exists(temp_filename):
+            os.remove(temp_filename)  # Cleanup even on error
         return jsonify({"error": str(e)}), 500
 
-@app.route('/process_folder', methods=['POST'])
-def process_folder():
-    # Get folder path from the request
-    data = request.json
-    folder_path = data.get('folder_path')
+# File processing routes
+@app.route('/law', methods=['POST'])
+def process_law():
+    return process_file_request(request, lawProcessor, "process_law")
 
-    if not folder_path or not os.path.exists(folder_path):
-        return jsonify({"error": "Invalid folder path"}), 400
+@app.route('/resume', methods=['POST'])
+def process_resume():
+    return process_file_request(request, resumeProcessor, "process_resume")
 
-    # Process all receipts in the folder
+# Helper function for text-based requests
+def process_text_request(request, processor, method_name):
+    if not request.json or 'text' not in request.json:
+        return jsonify({"error": "No text part"}), 400
+
+    text = request.json.get('text', '').strip()
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+
     try:
-        results = []
-        for filename in os.listdir(folder_path):
-            if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
-                image_path = os.path.join(folder_path, filename)
-                result = processor.process_receipt(image_path)
-                if result:
-                    results.append({"filename": filename, **result})
-
-        return jsonify(results), 200
-
+        result = getattr(processor, method_name)(text)
+        if result:
+            return jsonify(result), 200
+        return jsonify({"error": "Failed to process the text"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Text processing routes
+@app.route('/indiv', methods=['POST'])
+def process_indiv():
+    return process_text_request(request, indivProcessor, "process_indiv")
+
+@app.route('/conflict', methods=['POST'])
+def process_conflict():
+    return process_text_request(request, conflictProcessor, "process_conflict")
+
+@app.route('/nego', methods=['POST'])
+def process_nego():
+    return process_text_request(request, negoProcessor, "process_nego")
+
+# Run Flask app
 if __name__ == '__main__':
-    # Run the Flask app
     app.run(debug=True)

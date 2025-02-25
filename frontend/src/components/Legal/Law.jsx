@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { User, Bot, Upload, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 function Law() {
   const [file, setFile] = useState(null);
@@ -46,7 +47,7 @@ function Law() {
     // Add processing message
     const processingMessage = { 
       id: messages.length + 2, 
-      text: "Processing your receipt...", 
+      text: "Processing your image...", 
       sender: 'bot' 
     };
     setMessages(prev => [...prev, processingMessage]);
@@ -55,7 +56,7 @@ function Law() {
     formData.append('file', selectedFile);
     
     try {
-      const response = await axios.post('http://127.0.0.1:5000/process_receipt', formData, {
+      const response = await axios.post('http://127.0.0.1:5000/law', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -111,7 +112,10 @@ function Law() {
       <header className="bg-white border-b shadow-sm py-4 px-4">
         <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
           <div className="text-xl font-bold text-gray-800">Legality Analysis</div>
-          <div className="text-sm text-gray-500">Analyzes images for legal compliance</div>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="text-blue-500 hover:underline">Home</Link> 
+            <div className="text-sm text-gray-500">Analyzes images for legal compliance</div>
+          </div>
         </div>
       </header>
 
