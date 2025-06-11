@@ -17,19 +17,19 @@ class Nego:
             response = self.client.add_table_rows(
                 table_type=p.TableType.action,
                 request=p.RowAddRequest(
-                    table_id="Negotiation",
-                    data=[{"Transcript": input}],
+                    table_id="mental_health",
+                    data=[{"input": input}],
                     stream=False,
                 ),
             )
             
             results = {
-                "output1": response.rows[0].columns["Financing_Options"].text,
-                "output2": response.rows[0].columns["Customer_Needs"].text,
-                "output3": response.rows[0].columns["Customer_Budgets"].text,
-                "output4": response.rows[0].columns["Customer_Pain_Points"].text,
-                "output5": response.rows[0].columns["Urgency_Details"].text,
-                "output6": response.rows[0].columns["Legal_and_Ethical_Considerations"].text,
+                "output1": response.rows[0].columns["output1"].text,
+                "output2": response.rows[0].columns["output2"].text,
+                "output3": response.rows[0].columns["output3"].text,
+                "output4": response.rows[0].columns["output4"].text,
+                "output5": response.rows[0].columns["output5"].text,
+                "output6": response.rows[0].columns["output6"].text,
             }
             print(results)
             return results
