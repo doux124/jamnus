@@ -74,7 +74,8 @@ function Main() {
         sender: 'bot' 
       };
       
-      setMessages(prev => [...prev.filter(m => m.text !== "Processing your text..."), outputMessage1, outputMessage2, outputMessage3, outputMessage4, outputMessage5, outputMessage6]);
+      // setMessages(prev => [...prev.filter(m => m.text !== "Processing your text..."), outputMessage1, outputMessage2, outputMessage3, outputMessage4, outputMessage5, outputMessage6]);
+      setMessages(prev => [...prev.filter(m => m.text !== "Processing your text..."), outputMessage1]);
       
     } catch (err) {
       console.error('Error:', err);
